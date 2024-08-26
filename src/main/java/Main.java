@@ -31,7 +31,9 @@ public class Main {
 
               while((clientMessage = bufferedReader.readLine())!= null){
                 String response = "+PONG\r\n";
-                outputStream.write(response.getBytes());
+                if(clientMessage.trim().equalsIgnoreCase("PING")){
+                  outputStream.write(response.getBytes()); 
+                }
               }
               clientSocket.close();
             }
