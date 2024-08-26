@@ -28,8 +28,8 @@ public class Main {
               InputStream inputStream = clientSocket.getInputStream();
               BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
               String clientMessage;
-              clientMessage = bufferedReader.readLine();
-              while(clientMessage != null){
+
+              while((clientMessage = bufferedReader.readLine())!= null){
                 String response = "+PONG\r\n";
                 outputStream.write(response.getBytes());
               }
