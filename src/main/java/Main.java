@@ -1,4 +1,4 @@
-import java.io.IOException;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -24,9 +24,14 @@ public class Main {
         } finally {
           try {
             if (clientSocket != null) {
-              while(true){
-                clientSocket.getOutputStream().write("+PONG\r\n".getBytes());
-
+              OutputStream outputStream = clientSocket.getOutputStream();
+              InputStream inputStream = clientSocket.getInputStream();
+              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+              String clientMessage;
+              clientMessage = bufferedReader.readLine();
+              while(clientMessage != null){
+                String response = "+PONG\r\n";
+                outputStream.write(response.getBytes());
               }
               clientSocket.close();
             }
