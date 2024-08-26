@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 
 public class Main {
   public static void main(String[] args){
@@ -23,6 +24,7 @@ public class Main {
         } finally {
           try {
             if (clientSocket != null) {
+              clientSocket.getOutputStream().write("+PONG/r/n".getBytes());
               clientSocket.close();
             }
           } catch (IOException e) {
