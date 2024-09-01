@@ -1,5 +1,8 @@
+import javax.swing.*;
 import java.io.*;
 import java.net.Socket;
+import java.util.logging.Logger;
+
 public class ClientHandler implements Runnable {
   private Socket clientSocket;
   public ClientHandler(Socket clientSocket) {
@@ -15,14 +18,20 @@ public class ClientHandler implements Runnable {
       while (true) {
         content = reader.readLine();
         if (content == null) {
-          System.out.println("Client disconnected.");
+          Logger.getLogger("Client disconnected.");
           break;
         }
-        System.out.println("::" + content);
+        Logger.getLogger("::" + content);
         if ("ping".equalsIgnoreCase(content)) {
           writer.write("+PONG\r\n");
           writer.flush();
-        } else if ("eof".equalsIgnoreCase(content)) {
+        } else if("echo".equalsIgnoreCase(content)) {
+          String message = reader.readLine();
+          String response = getEchoMessage(message);
+          writer.write(response);
+          writer.flush();
+        }
+        else if ("eof".equalsIgnoreCase(content)) {
           System.out.println("EOF received. Closing Connection.");
           break;
         }
@@ -38,5 +47,10 @@ public class ClientHandler implements Runnable {
         e.printStackTrace();
       }
     }
+  }
+
+  private String getEchoMessage(String message) {
+    String format = String.format("$%d\r\n%s\r\n", message.length(), message);
+    return format;
   }
 }

@@ -3,13 +3,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Logger;
 public class Main {
 
   private static final String exceptionName = "IOException: ";
   public static void main(String[] args) {
     // You can use print statements as follows for debugging, they'll be visible
     // when running tests.
-    System.out.println("Logs from your program will appear here!");
+    Logger.getLogger("Logs from your program will appear here!");
     //  Uncomment this block to pass the first stage
     ServerSocket serverSocket = null;
     Socket clientSocket = null;
@@ -23,14 +24,14 @@ public class Main {
       serverSocket.setReuseAddress(true);
       // Wait for connection from client.
 
-      System.out.println("Server is listening on port: " + port);
+      Logger.getLogger("Server is listening on port: " + port);
       while (true) {
         clientSocket = serverSocket.accept();
         System.out.println("New Client Connected.");
         executorService.submit(new ClientHandler(clientSocket));
       }
     } catch (IOException e) {
-      System.out.println(exceptionName + e.getMessage());
+      Logger.getLogger(exceptionName + e.getMessage());
     } finally {
       try {
         if (clientSocket != null) {
@@ -38,7 +39,7 @@ public class Main {
         }
         executorService.shutdown();
       } catch (IOException e) {
-        System.out.println(exceptionName + e.getMessage());
+       Logger.getLogger(exceptionName + e.getMessage());
       }
     }
   }
