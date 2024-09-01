@@ -22,7 +22,7 @@ public class ClientHandler implements Runnable {
           Logger.getLogger("Client disconnected.");
           break;
         }
-        Logger.getLogger("::" + content);
+        System.out.println("::" + content);
         if ("ping".equalsIgnoreCase(content)) {
           writer.write("+PONG\r\n");
           writer.flush();
