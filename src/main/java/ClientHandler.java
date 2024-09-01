@@ -25,13 +25,12 @@ public class ClientHandler implements Runnable {
         if ("ping".equalsIgnoreCase(content)) {
           writer.write("+PONG\r\n");
           writer.flush();
-        } else if("echo".equalsIgnoreCase(content)) {
+        } else if ("echo".equalsIgnoreCase(content)) {
           String message = reader.readLine();
           String response = getEchoMessage(message);
           writer.write(response);
           writer.flush();
-        }
-        else if ("eof".equalsIgnoreCase(content)) {
+        } else if ("eof".equalsIgnoreCase(content)) {
           System.out.println("EOF received. Closing Connection.");
           break;
         }
