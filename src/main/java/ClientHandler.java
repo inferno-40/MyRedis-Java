@@ -27,6 +27,7 @@ public class ClientHandler implements Runnable {
           writer.write("+PONG\r\n");
           writer.flush();
         } else if ("echo".equalsIgnoreCase(content)) {
+          reader.readLine();
           String message = reader.readLine();
           String response = getEchoMessage(message);
           writer.write(response);
