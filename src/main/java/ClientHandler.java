@@ -1,13 +1,14 @@
-import javax.swing.*;
 import java.io.*;
 import java.net.Socket;
 import java.util.logging.Logger;
 
 public class ClientHandler implements Runnable {
   private Socket clientSocket;
+
   public ClientHandler(Socket clientSocket) {
     this.clientSocket = clientSocket;
   }
+
   @Override
   public void run() {
     try (BufferedReader reader = new BufferedReader(
