@@ -4,7 +4,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
-import java.util.Date;
+
 
 public class ClientHandler implements Runnable {
 
@@ -57,11 +57,11 @@ public class ClientHandler implements Runnable {
             System.out.println("::");
             reader.readLine();
             String time = reader.readLine();
-            System.out.println(time);
+            System.out.println(Long.parseLong(time));
             Runnable task = () -> {
               RedisCache.delete(key);
             };
-            scheduler.schedule(task,Integer.parseInt(time), TimeUnit.SECONDS);
+            scheduler.schedule(task, Long.parseLong(time), TimeUnit.SECONDS);
             scheduler.shutdown();
           }
           writer.write(OK_BULK_STRING);
