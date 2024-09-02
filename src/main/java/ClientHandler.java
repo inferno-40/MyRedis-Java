@@ -54,10 +54,10 @@ public class ClientHandler implements Runnable {
           RedisCache.set(key, value);
           reader.readLine();
           if("px".equalsIgnoreCase(reader.readLine())){
-            Logger.getLogger("::");
+            System.out.println("::");
             reader.readLine();
             String time = reader.readLine();
-            Logger.getLogger(time);
+            System.out.println(time);
             Runnable task = () -> {
               RedisCache.delete(key);
             };
