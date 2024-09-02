@@ -19,7 +19,7 @@ public class ClientHandler implements Runnable {
     this.clientSocket = clientSocket;
   }
 
-  ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+  ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(10);
 
   @Override
   public void run() {
