@@ -61,7 +61,7 @@ public class ClientHandler implements Runnable {
               RedisCache.delete(key);
               System.out.println(key);
             };
-            scheduler.schedule(task, Long.parseLong(time), TimeUnit.SECONDS);
+            scheduler.schedule(task, Long.parseLong(time), TimeUnit.MILLISECONDS);
             scheduler.shutdown();
           }
           writer.write(OK_BULK_STRING);
