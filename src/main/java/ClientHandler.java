@@ -16,6 +16,7 @@ public class ClientHandler implements Runnable {
          BufferedWriter writer = new BufferedWriter(
                  new OutputStreamWriter(clientSocket.getOutputStream()))) {
       String content;
+      // can move this whole block to a new class.
       while (true) {
         content = reader.readLine();
         if (content == null) {
@@ -32,7 +33,23 @@ public class ClientHandler implements Runnable {
           String response = getEchoMessage(message);
           writer.write(response);
           writer.flush();
-        } else if ("eof".equalsIgnoreCase(content)) {
+        }
+        else if ("set".equalsIgnoreCase(content)){
+          reader.readLine();
+          String key = reader.readLine();
+          reader.readLine();
+          String value = reader.readLine();
+          RedisCache.set(key, value);
+          writer.write("+OK\r\n");
+          writer.flush();
+        }
+        else if("get".equalsIgnoreCase(content)) {
+          reader.readLine();
+          String key = reader.readLine();
+          String response = RedisCache.get(key);
+          writer.write(response);
+          writer.flush();
+        }else if ("eof".equalsIgnoreCase(content)) {
           System.out.println("EOF received. Closing Connection.");
           break;
         }
