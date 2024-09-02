@@ -19,6 +19,7 @@ public class RedisCache {
 
   public static void set(String key,String value) {
     map.put(key, value);
+    System.out.println(key);
   }
 
   public static void delete(String key) {

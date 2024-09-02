@@ -54,7 +54,6 @@ public class ClientHandler implements Runnable {
           RedisCache.set(key, value);
           reader.readLine();
           if("px".equalsIgnoreCase(reader.readLine())){
-            System.out.println("::");
             reader.readLine();
             String time = reader.readLine();
             System.out.println(Long.parseLong(time));
