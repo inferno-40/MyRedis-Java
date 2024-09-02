@@ -67,7 +67,8 @@ public class ClientHandler implements Runnable {
         else if("get".equalsIgnoreCase(content)) {
           reader.readLine();
           String key = reader.readLine();
-          String response = getRESPMessage(RedisCache.get(key));
+          String value = RedisCache.get(key);
+          String response = (value == NULL_BULK_STRING) ? NULL_BULK_STRING : getRESPMessage(value);
           writer.write(response);
           writer.flush();
         }else if ("eof".equalsIgnoreCase(content)) {
