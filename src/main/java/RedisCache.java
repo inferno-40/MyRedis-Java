@@ -10,7 +10,11 @@ public class RedisCache {
 
   // need error handling for the case when key is not present.
   public static String get(String key) {
-    return map.get(key);
+    if(map.containsKey(key)) {
+      return map.get(key);
+    } else {
+      return ClientHandler.NULL_BULK_STRING;
+    }
   }
 
   public static void set(String key,String value) {

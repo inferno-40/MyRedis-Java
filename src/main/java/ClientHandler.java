@@ -58,7 +58,7 @@ public class ClientHandler implements Runnable {
             String time = reader.readLine();
             System.out.println(Long.parseLong(time));
             Runnable task = () -> {
-//              RedisCache.delete(key);
+              RedisCache.delete(key);
               System.out.println(key);
             };
             scheduler.schedule(task, Long.parseLong(time), TimeUnit.SECONDS);
@@ -71,7 +71,6 @@ public class ClientHandler implements Runnable {
           reader.readLine();
           String key = reader.readLine();
           String value = RedisCache.get(key);
-          System.out.println(value);
           String response = (value == NULL_BULK_STRING) ? NULL_BULK_STRING : getRESPMessage(value);
           writer.write(response);
           writer.flush();
