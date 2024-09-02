@@ -30,7 +30,7 @@ public class ClientHandler implements Runnable {
         } else if ("echo".equalsIgnoreCase(content)) {
           reader.readLine();
           String message = reader.readLine();
-          String response = getEchoMessage(message);
+          String response = getRESPMessage(message);
           writer.write(response);
           writer.flush();
         }
@@ -46,7 +46,7 @@ public class ClientHandler implements Runnable {
         else if("get".equalsIgnoreCase(content)) {
           reader.readLine();
           String key = reader.readLine();
-          String response = RedisCache.get(key);
+          String response = getRESPMessage(RedisCache.get(key));
           writer.write(response);
           writer.flush();
         }else if ("eof".equalsIgnoreCase(content)) {
@@ -67,7 +67,7 @@ public class ClientHandler implements Runnable {
     }
   }
 
-  private String getEchoMessage(String message) {
+  private String getRESPMessage(String message) {
     String format = String.format("$%d\r\n%s\r\n", message.length(), message);
     return format;
   }
