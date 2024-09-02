@@ -56,6 +56,7 @@ public class ClientHandler implements Runnable {
           if("px".equalsIgnoreCase(reader.readLine())){
             reader.readLine();
             String time = reader.readLine();
+            Logger.getLogger(time);
             Runnable task = () -> {
               RedisCache.delete(key);
             };
@@ -72,7 +73,7 @@ public class ClientHandler implements Runnable {
           writer.write(response);
           writer.flush();
         }else if ("eof".equalsIgnoreCase(content)) {
-          System.out.println("EOF received. Closing Connection.");
+          Logger.getLogger("EOF received. Closing Connection.");
           break;
         }
       }
