@@ -56,12 +56,11 @@ public class ClientHandler implements Runnable {
           if(reader.readLine() != null && "px".equalsIgnoreCase(reader.readLine())){
             reader.readLine();
             String time = reader.readLine();
-            System.out.println(Long.parseLong(time));
             Runnable task = () -> {
               RedisCache.delete(key);
               System.out.println(key);
             };
-            scheduler.schedule(task, Long.parseLong(time), TimeUnit.MILLISECONDS);
+            scheduler.schedule(task, Long.parseLong(time) -1, TimeUnit.MILLISECONDS);
             scheduler.shutdown();
           }
           writer.write(OK_BULK_STRING);
