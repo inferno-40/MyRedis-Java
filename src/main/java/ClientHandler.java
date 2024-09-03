@@ -8,10 +8,10 @@ import java.util.logging.Logger;
 
 public class ClientHandler implements Runnable {
 
-  public final static String OK_BULK_STRING = "+OK\r\n";
-  public final static String PONG_BULK_STRING = "+PONG\r\n";
+  public final static String OK_BULK_STRING = "+OK\r";
+  public final static String PONG_BULK_STRING = "+PONG\r";
   public final static String ECHO_BULK_STRING = "$%d\r\n%s\r\n";
-  public final static String NULL_BULK_STRING = "$-1\r\n";
+  public final static String NULL_BULK_STRING = "$-1\r";
 
   private Socket clientSocket;
 
@@ -25,8 +25,8 @@ public class ClientHandler implements Runnable {
   public void run() {
     try (BufferedReader reader = new BufferedReader(
             new InputStreamReader(clientSocket.getInputStream()));
-         BufferedWriter writer = new BufferedWriter(
-                 new OutputStreamWriter(clientSocket.getOutputStream()))) {
+         PrintWriter writer = new PrintWriter(
+            new OutputStreamWriter(clientSocket.getOutputStream()))) {
       String content;
       // can move this whole block to a new class.
       while (true) {
@@ -43,8 +43,7 @@ public class ClientHandler implements Runnable {
           reader.readLine();
           String message = reader.readLine();
           String response = getRESPMessage(message);
-          writer.write(response);
-          writer.flush();
+          writer.println(response);
         }
         else if ("set".equalsIgnoreCase(content)){
           reader.readLine();
@@ -64,16 +63,14 @@ public class ClientHandler implements Runnable {
             scheduler.schedule(task, Long.parseLong(time), TimeUnit.MILLISECONDS);
             scheduler.shutdown();
           }
-          writer.write(OK_BULK_STRING);
-          writer.flush();
+          writer.println(OK_BULK_STRING);
         }
         else if("get".equalsIgnoreCase(content)) {
           reader.readLine();
           String key = reader.readLine();
           String value = RedisCache.get(key);
           String response = (value == NULL_BULK_STRING) ? NULL_BULK_STRING : getRESPMessage(value);
-          writer.write(response);
-          writer.flush();
+          writer.println(response);
         }else if ("eof".equalsIgnoreCase(content)) {
           Logger.getLogger("EOF received. Closing Connection.");
           break;
