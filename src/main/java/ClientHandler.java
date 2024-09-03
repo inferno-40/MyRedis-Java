@@ -130,15 +130,14 @@ public class ClientHandler implements Runnable {
         }
         break;
       case "config":
-        if(command.length != 3) {
+        if(command.length < 4) {
           throw new IOException(
                   "-ERR wrong number of arguments for 'config' command.\r");
         }
-        String configName = command[3];
-        System.out.println(configName);
-//        String configValue = command[4];
+        String configName = command[2];
+        String configValue = command[3];
         sendBulkString(writer, configName);
-//        sendBulkString(writer, configValue);
+        sendBulkString(writer, configValue);
       default:
         break;
     }
