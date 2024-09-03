@@ -130,21 +130,22 @@ public class ClientHandler implements Runnable {
         }
         break;
       case "config":
-        System.out.println(command.length);
         if(command.length < 3) {
           throw new IOException(
                   "-ERR wrong number of arguments for 'config' command.\r");
         }
         String configName = command[2];
-        addToBulkArray(writer, configName);
+        response = String.format(FORMAT_BULK_STRING, configName.length(), configName) + "\n";
         String configValue;
         if(configName.equalsIgnoreCase("dir")) {
           configValue = RDBFile.getFileDir();
         } else {
           configValue = RDBFile.getFileName();
         }
-        addToBulkArray(writer, configValue);
-        writer.flush();
+        response = response + String.format(FORMAT_BULK_STRING, configValue.length(), configValue);
+        writer.println(response);
+        break;
+
       default:
         break;
     }
@@ -152,10 +153,6 @@ public class ClientHandler implements Runnable {
 
   private void sendPong(PrintWriter writer) {
     writer.println(PONG_BULK_STRING);
-  }
-
-  private void addToBulkArray(PrintWriter writer, String response) {
-    writer.write(String.format(FORMAT_BULK_STRING, response.length(), response) + "\n");
   }
 
   private void sendBulkString(PrintWriter writer, String response) {
