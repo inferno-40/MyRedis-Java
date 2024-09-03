@@ -1,5 +1,7 @@
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -130,20 +132,22 @@ public class ClientHandler implements Runnable {
         }
         break;
       case "config":
-        if(command.length < 3) {
+        if (command.length < 3) {
           throw new IOException(
                   "-ERR wrong number of arguments for 'config' command.\r");
         }
         String configName = command[2];
-        response = String.format(FORMAT_BULK_STRING, configName.length(), configName) + "\n";
         String configValue;
-        if(configName.equalsIgnoreCase("dir")) {
-          configValue = RDBFile.getFileDir();
+        if (configName.equalsIgnoreCase("dir")) {
+          configValue = RDBConfig.getInstance().getDir();
         } else {
-          configValue = RDBFile.getFileName();
+          configValue = RDBConfig.getInstance().getDbFileName();
         }
-        response = response + String.format(FORMAT_BULK_STRING, configValue.length(), configValue);
-        writer.println(response);
+        List<String> listResponse = new ArrayList<>();
+        listResponse.add(configName);
+        listResponse.add(configValue);
+        String respArray = toRESPArray(listResponse);
+        writer.println(respArray);
         break;
 
       default:
@@ -159,4 +163,20 @@ public class ClientHandler implements Runnable {
     writer.println(String.format(FORMAT_BULK_STRING, response.length(), response));
   }
 
+  public static String toBulkString(String input) {
+    if (input == null) {
+      return "$-1\r\n"; // Null bulk string
+    }
+    return "$" + input.length() + "\r\n" + input + "\r\n";
+  }
+
+
+  public static String toRESPArray(List<String> input) {
+    int len = input.size();
+    StringBuilder output = new StringBuilder(String.format("*%d\r\n", len));
+    for (String in : input) {
+      output.append(toBulkString(in));
+    }
+    return output.toString();
+  }
 }
