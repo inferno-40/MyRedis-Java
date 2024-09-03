@@ -10,7 +10,7 @@ public class ClientHandler implements Runnable {
 
   public final static String OK_BULK_STRING = "+OK\r";
   public final static String PONG_BULK_STRING = "+PONG\r";
-  public final static String ECHO_BULK_STRING = "$%d\r\n%s\r";
+  public final static String FORMAT_BULK_STRING = "$%d\r\n%s\r";
   public final static String NULL_BULK_STRING = "$-1\r";
 
   private Socket clientSocket;
@@ -34,46 +34,10 @@ public class ClientHandler implements Runnable {
           Logger.getLogger("Client disconnected.");
           break;
         }
-        System.out.println("::" + content);
-        if ("ping".equalsIgnoreCase(content)) {
-          writer.write(PONG_BULK_STRING);
-          writer.flush();
-        } else if ("echo".equalsIgnoreCase(content)) {
-          reader.readLine();
-          String message = reader.readLine();
-          String response = getRESPMessage(message);
-          writer.println(response);
-        }
-        else if ("set".equalsIgnoreCase(content)){
-          reader.readLine();
-          String key = reader.readLine();
-          reader.readLine();
-          String value = reader.readLine();
-          RedisCache.set(key, value);
-          reader.readLine();
-          String exp = reader.readLine();
-          if(exp != null && "px".equalsIgnoreCase(exp)){
-            System.out.println(value);
-            reader.readLine();
-            String time = reader.readLine();
-            Runnable task = () -> {
-              RedisCache.delete(key);
-            };
-            scheduler.schedule(task, Long.parseLong(time), TimeUnit.MILLISECONDS);
-            scheduler.shutdown();
-          }
-          writer.println(OK_BULK_STRING);
-        }
-        else if("get".equalsIgnoreCase(content)) {
-          reader.readLine();
-          String key = reader.readLine();
-          String value = RedisCache.get(key);
-          String response = (value == NULL_BULK_STRING) ? NULL_BULK_STRING : getRESPMessage(value);
-          writer.println(response);
-        }else if ("eof".equalsIgnoreCase(content)) {
-          Logger.getLogger("EOF received. Closing Connection.");
-          break;
-        }
+        int length = Integer.parseInt(content.substring(1, 2));
+        String[] command = parseArray(length, content, reader);
+        executeCommand(command, writer);
+
       }
     } catch (IOException e) {
       e.printStackTrace();
@@ -88,8 +52,92 @@ public class ClientHandler implements Runnable {
     }
   }
 
-  private String getRESPMessage(String message) {
-    String format = String.format(ECHO_BULK_STRING, message.length(), message);
-    return format;
+  private static String[] parseArray(int length, String data,
+                                     BufferedReader br) {
+    String[] parts = new String[length];
+    for (int i = 0; i < length; i++) {
+      try {
+        String line = br.readLine();
+        if (line.startsWith("$")) {
+          parts[i] = parseBulkString(line, br);
+        }
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+    return parts;
   }
+
+  private static String parseBulkString(String line, BufferedReader br)
+          throws IOException {
+    int strLength =
+            Integer.parseInt(line.substring(1)); // Get the string length
+    char[] buffer = new char[strLength];
+    int charsRead = br.read(
+            buffer, 0, strLength); // Read exactly strLength characters to buffer
+    if (charsRead < strLength) {
+      throw new IOException("Expected " + strLength + " characters but read " +
+              charsRead);
+    }
+    br.readLine(); // Read the trailing \r\n
+    return new String(buffer);
+  }
+
+  private void executeCommand(String[] command, PrintWriter writer) throws IOException {
+    switch (command[0].toLowerCase()) {
+      case "ping" :
+        sendPong(writer);
+        break;
+      case "echo" :
+        if (command.length != 2) {
+          throw new IOException(
+                  "-ERR wrong number of arguments for 'echo' command.\r");
+        }
+        sendBulkString(writer, command[1]);
+        break;
+      case "set" :
+        if(command.length < 3 && command.length % 2 == 0) {
+          throw new IOException(
+                  "-ERR wrong number of arguments for 'set' command.\r");
+        }
+        System.out.println(command[1]);
+        System.out.println(command[2]);
+        RedisCache.set(command[1], command[2]);
+
+        if(command.length == 5){
+          if(command[3].equalsIgnoreCase("px")) {
+            long delay = Long.parseLong(command[4]);
+            scheduler.schedule(
+                    () -> RedisCache.delete(command[3]), delay, TimeUnit.MILLISECONDS
+            );
+          }
+        }
+        writer.println(OK_BULK_STRING);
+        break;
+      case "get" :
+        if(command.length != 2){
+          throw new IOException(
+                  "-ERR wrong number of arguments for 'get' command.\r");
+        }
+        String response = RedisCache.get(command[1]);
+        if(response == NULL_BULK_STRING) {
+          writer.println(NULL_BULK_STRING);
+        }
+        else {
+          sendBulkString(writer, response);
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
+  private void sendPong(PrintWriter writer) {
+    writer.println(PONG_BULK_STRING);
+  }
+
+  private void sendBulkString(PrintWriter writer, String response) {
+    writer.println(String.format(FORMAT_BULK_STRING,response.length(),response));
+  }
+
 }
