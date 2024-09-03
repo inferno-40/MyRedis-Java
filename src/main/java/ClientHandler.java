@@ -100,15 +100,18 @@ public class ClientHandler implements Runnable {
           throw new IOException(
                   "-ERR wrong number of arguments for 'set' command.\r");
         }
-        System.out.println(command[1]);
-        System.out.println(command[2]);
-        RedisCache.set(command[1], command[2]);
+        String key = command[1];
+        String value = command[2];
+        System.out.println(key);
+        System.out.println(value);
+        RedisCache.set(key, value);
 
         if(command.length == 5){
           if(command[3].equalsIgnoreCase("px")) {
             long delay = Long.parseLong(command[4]);
+            System.out.println(delay);
             scheduler.schedule(
-                    () -> RedisCache.delete(command[3]), delay, TimeUnit.MILLISECONDS
+                    () -> RedisCache.delete(key), delay, TimeUnit.MILLISECONDS
             );
           }
         }
