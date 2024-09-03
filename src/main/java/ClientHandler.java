@@ -147,7 +147,7 @@ public class ClientHandler implements Runnable {
         listResponse.add(configName);
         listResponse.add(configValue);
         String respArray = toRESPArray(listResponse);
-        writer.println(respArray);
+        writer.print(respArray);
         break;
 
       default:
