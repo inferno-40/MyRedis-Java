@@ -148,6 +148,7 @@ public class ClientHandler implements Runnable {
         listResponse.add(configValue);
         String respArray = toRESPArray(listResponse);
         writer.write(respArray);
+        writer.flush();
         break;
 
       default:
