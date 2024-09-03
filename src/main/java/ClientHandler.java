@@ -25,8 +25,7 @@ public class ClientHandler implements Runnable {
   public void run() {
     try (BufferedReader reader = new BufferedReader(
             new InputStreamReader(clientSocket.getInputStream()));
-         PrintWriter writer = new PrintWriter(
-            new OutputStreamWriter(clientSocket.getOutputStream()))) {
+         PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(),true)) {
       String content;
       // can move this whole block to a new class.
       while (true) {
