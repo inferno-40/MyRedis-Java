@@ -19,7 +19,7 @@ public class ClientHandler implements Runnable {
     this.clientSocket = clientSocket;
   }
 
-  ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(10);
+  ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
   @Override
   public void run() {
@@ -60,7 +60,7 @@ public class ClientHandler implements Runnable {
               RedisCache.delete(key);
               System.out.println(key);
             };
-            scheduler.schedule(task, Long.parseLong(time) -1, TimeUnit.MILLISECONDS);
+            scheduler.schedule(task, Long.parseLong(time), TimeUnit.MILLISECONDS);
             scheduler.shutdown();
           }
           writer.write(OK_BULK_STRING);
