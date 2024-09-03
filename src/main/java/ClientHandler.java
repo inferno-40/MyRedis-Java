@@ -25,7 +25,7 @@ public class ClientHandler implements Runnable {
   public void run() {
     try (BufferedReader reader = new BufferedReader(
             new InputStreamReader(clientSocket.getInputStream()));
-         PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(),true)) {
+         PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true)) {
       String content;
       // can move this whole block to a new class.
       while (true) {
@@ -85,18 +85,18 @@ public class ClientHandler implements Runnable {
 
   private void executeCommand(String[] command, PrintWriter writer) throws IOException {
     switch (command[0].toLowerCase()) {
-      case "ping" :
+      case "ping":
         sendPong(writer);
         break;
-      case "echo" :
+      case "echo":
         if (command.length != 2) {
           throw new IOException(
                   "-ERR wrong number of arguments for 'echo' command.\r");
         }
         sendBulkString(writer, command[1]);
         break;
-      case "set" :
-        if(command.length < 3 && command.length % 2 == 0) {
+      case "set":
+        if (command.length < 3 && command.length % 2 == 0) {
           throw new IOException(
                   "-ERR wrong number of arguments for 'set' command.\r");
         }
@@ -106,8 +106,8 @@ public class ClientHandler implements Runnable {
         System.out.println(value);
         RedisCache.set(key, value);
 
-        if(command.length == 5){
-          if(command[3].equalsIgnoreCase("px")) {
+        if (command.length == 5) {
+          if (command[3].equalsIgnoreCase("px")) {
             long delay = Long.parseLong(command[4]);
             System.out.println(delay);
             scheduler.schedule(
@@ -117,19 +117,27 @@ public class ClientHandler implements Runnable {
         }
         writer.println(OK_BULK_STRING);
         break;
-      case "get" :
-        if(command.length != 2){
+      case "get":
+        if (command.length != 2) {
           throw new IOException(
                   "-ERR wrong number of arguments for 'get' command.\r");
         }
         String response = RedisCache.get(command[1]);
-        if(response == NULL_BULK_STRING) {
+        if (response == NULL_BULK_STRING) {
           writer.println(NULL_BULK_STRING);
-        }
-        else {
+        } else {
           sendBulkString(writer, response);
         }
         break;
+      case "config":
+        if(command.length != 3) {
+          throw new IOException(
+                  "-ERR wrong number of arguments for 'config' command.\r");
+        }
+        String configName = command[3];
+        String configValue = command[4];
+        sendBulkString(writer, configName);
+        sendBulkString(writer, configValue);
       default:
         break;
     }
@@ -140,7 +148,7 @@ public class ClientHandler implements Runnable {
   }
 
   private void sendBulkString(PrintWriter writer, String response) {
-    writer.println(String.format(FORMAT_BULK_STRING,response.length(),response));
+    writer.println(String.format(FORMAT_BULK_STRING, response.length(), response));
   }
 
 }
