@@ -53,7 +53,8 @@ public class ClientHandler implements Runnable {
           String value = reader.readLine();
           RedisCache.set(key, value);
           reader.readLine();
-          if(reader.readLine() != null && "px".equalsIgnoreCase(reader.readLine())){
+          String exp = reader.readLine();
+          if(exp != null && "px".equalsIgnoreCase(exp)){
             reader.readLine();
             String time = reader.readLine();
             Runnable task = () -> {
