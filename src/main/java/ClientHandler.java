@@ -136,9 +136,9 @@ public class ClientHandler implements Runnable {
                   "-ERR wrong number of arguments for 'config' command.\r");
         }
         String configName = command[2];
-        String configValue = command[3];
+//        String configValue = command[3];
         sendBulkString(writer, configName);
-        sendBulkString(writer, configValue);
+//        sendBulkString(writer, configValue);
       default:
         break;
     }
