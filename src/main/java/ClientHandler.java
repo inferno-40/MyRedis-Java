@@ -99,7 +99,7 @@ public class ClientHandler implements Runnable {
                   "-ERR wrong number of arguments for 'echo' command.\r");
         }
         response = handleEcho(command);
-        sendBulkString(writer, response);
+        sendResponse(writer, response);
         break;
       case "set":
         if (command.length < 3 && command.length % 2 == 0) {
@@ -107,7 +107,7 @@ public class ClientHandler implements Runnable {
                   "-ERR wrong number of arguments for 'set' command.\r");
         }
         response = handleSet(command);
-        sendBulkString(writer, response);
+        sendResponse(writer, response);
         break;
       case "get":
         if (command.length != 2) {
@@ -115,7 +115,7 @@ public class ClientHandler implements Runnable {
                   "-ERR wrong number of arguments for 'get' command.\r");
         }
         response = handleGet(command);
-        sendBulkString(writer, response);
+        sendResponse(writer, response);
         break;
       case "config":
         if (command.length < 3) {
@@ -123,13 +123,11 @@ public class ClientHandler implements Runnable {
                   "-ERR wrong number of arguments for 'config' command.\r");
         }
         response = handleConfig(command);
-        writer.write(response);
-        writer.flush();
+        sendResponse(writer, response);
         break;
       case "keys":
         response = handleKeys(command);
-        writer.write(response);
-        writer.flush();
+        sendResponse(writer, response);
       default:
         break;
     }
@@ -221,8 +219,8 @@ public class ClientHandler implements Runnable {
     writer.println(PONG_BULK_STRING);
   }
 
-  private void sendBulkString(PrintWriter writer, String response) {
-    writer.print(String.format(FORMAT_BULK_STRING, response.length(), response));
+  private void sendResponse(PrintWriter writer, String response) {
+    writer.print(response);
     writer.flush();
   }
 
