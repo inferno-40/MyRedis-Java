@@ -123,11 +123,13 @@ public class ClientHandler implements Runnable {
                   "-ERR wrong number of arguments for 'config' command.\r");
         }
         response = handleConfig(command);
-        sendBulkString(writer, response);
+        writer.write(response);
+        writer.flush();
         break;
       case "keys":
         response = handleKeys(command);
-        sendBulkString(writer, response);
+        writer.write(response);
+        writer.flush();
       default:
         break;
     }
