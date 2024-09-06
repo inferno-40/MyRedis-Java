@@ -15,7 +15,7 @@ public class ClientHandler implements Runnable {
 
   public final static String OK_BULK_STRING = "+OK\r\n";
   public final static String PONG_BULK_STRING = "+PONG\r";
-  public final static String FORMAT_BULK_STRING = "$%d\r\n%s\r";
+  public final static String FORMAT_BULK_STRING = "$%d\r\n%s\r\n";
   public final static String NULL_BULK_STRING = "$-1\r\n";
 
   private Socket clientSocket;
