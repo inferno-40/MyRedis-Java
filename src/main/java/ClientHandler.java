@@ -1,19 +1,22 @@
+import config.RDBConfig;
+import redisdatastructure.RedisCache;
+
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+
+import resp.RespConvertor;
 
 
 public class ClientHandler implements Runnable {
 
-  public final static String OK_BULK_STRING = "+OK\r";
+  public final static String OK_BULK_STRING = "+OK\r\n";
   public final static String PONG_BULK_STRING = "+PONG\r";
   public final static String FORMAT_BULK_STRING = "$%d\r\n%s\r";
-  public final static String NULL_BULK_STRING = "$-1\r";
+  public final static String NULL_BULK_STRING = "$-1\r\n";
 
   private Socket clientSocket;
 
@@ -21,7 +24,6 @@ public class ClientHandler implements Runnable {
     this.clientSocket = clientSocket;
   }
 
-  ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
   @Override
   public void run() {
@@ -86,6 +88,7 @@ public class ClientHandler implements Runnable {
   }
 
   private void executeCommand(String[] command, PrintWriter writer) throws IOException {
+    String response;
     switch (command[0].toLowerCase()) {
       case "ping":
         sendPong(writer);
@@ -95,60 +98,32 @@ public class ClientHandler implements Runnable {
           throw new IOException(
                   "-ERR wrong number of arguments for 'echo' command.\r");
         }
-        sendBulkString(writer, command[1]);
+        response = handleEcho(command);
+        sendBulkString(writer, response);
         break;
       case "set":
         if (command.length < 3 && command.length % 2 == 0) {
           throw new IOException(
                   "-ERR wrong number of arguments for 'set' command.\r");
         }
-        String key = command[1];
-        String value = command[2];
-        System.out.println(key);
-        System.out.println(value);
-        RedisCache.set(key, value);
-
-        if (command.length == 5) {
-          if (command[3].equalsIgnoreCase("px")) {
-            long delay = Long.parseLong(command[4]);
-            System.out.println(delay);
-            scheduler.schedule(
-                    () -> RedisCache.delete(key), delay, TimeUnit.MILLISECONDS
-            );
-          }
-        }
-        writer.println(OK_BULK_STRING);
+        response = handleSet(command);
+        sendBulkString(writer, response);
         break;
       case "get":
         if (command.length != 2) {
           throw new IOException(
                   "-ERR wrong number of arguments for 'get' command.\r");
         }
-        String response = RedisCache.get(command[1]);
-        if (response == NULL_BULK_STRING) {
-          writer.println(NULL_BULK_STRING);
-        } else {
-          sendBulkString(writer, response);
-        }
+        response = handleGet(command);
+        sendBulkString(writer, response);
         break;
       case "config":
         if (command.length < 3) {
           throw new IOException(
                   "-ERR wrong number of arguments for 'config' command.\r");
         }
-        String configName = command[2];
-        String configValue;
-        if (configName.equalsIgnoreCase("dir")) {
-          configValue = RDBConfig.getInstance().getDir();
-        } else {
-          configValue = RDBConfig.getInstance().getDbFileName();
-        }
-        List<String> listResponse = new ArrayList<>();
-        listResponse.add(configName);
-        listResponse.add(configValue);
-        String respArray = toRESPArray(listResponse);
-        writer.write(respArray);
-        writer.flush();
+        response = handleConfig(command);
+        sendBulkString(writer, response);
         break;
 
       default:
@@ -156,28 +131,95 @@ public class ClientHandler implements Runnable {
     }
   }
 
+  private String handleKeys(String[] command) {
+    try {
+      String pattern = command[1];
+      String bulkArrayResponse = "";
+      if (pattern.equalsIgnoreCase("*")) {
+        bulkArrayResponse = RespConvertor.toRESPArray(RedisCache.getKeys());
+      }
+      return bulkArrayResponse;
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+    }
+    return null;
+  }
+
+  private String handleConfig(String[] command) {
+    try {
+      if (RDBConfig.isRDBEnabled) {
+        String configParam = command[2];
+        List<String> input;
+        if (configParam.equalsIgnoreCase("dir")) {
+          input = List.of(configParam, RDBConfig.getInstance().getDir());
+        } else {
+          input = List.of(configParam, RDBConfig.getInstance().getDbFileName());
+        }
+        return RespConvertor.toRESPArray(input);
+      }
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+    }
+    return null;
+  }
+
+  private String handleGet(String[] command) {
+    try {
+      String key = command[1];
+      System.out.println("Key: " + key);
+      RedisCache.Value value = RedisCache.getValue(key);
+      System.out.println("value: " + value);
+      long now = (Timestamp.valueOf(LocalDateTime.now()).getTime());
+      if (value == null || (value.canExpire() && now >= value.expiry())) {
+        RedisCache.delete(key);
+        return RespConvertor.toBulkString(null);
+      }
+      return RespConvertor.toBulkString(value.value());
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+    }
+    return null;
+  }
+
+  private String handleEcho(String[] command) {
+    if (command.length > 1) {
+      String text = command[1];
+      return RespConvertor.toBulkString(text);
+    }
+    return "";
+  }
+
+  private String handleSet(String[] command) throws IllegalArgumentException {
+    try {
+      if (command.length > 2) {
+        String key = command[1];
+        String val = command[2];
+        long expiry = 0;
+        boolean canExpire = false;
+        if (command.length > 4) {
+          canExpire = true;
+          expiry = Long.parseLong(command[4]);
+        }
+
+        RedisCache.Value value = new RedisCache.Value(val, canExpire, (Timestamp.valueOf(LocalDateTime.now()).getTime()) + expiry);
+        RedisCache.setValue(key, value);
+        return OK_BULK_STRING;
+      } else {
+        throw new IllegalArgumentException();
+      }
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+    }
+    return null;
+  }
+
   private void sendPong(PrintWriter writer) {
     writer.println(PONG_BULK_STRING);
   }
 
   private void sendBulkString(PrintWriter writer, String response) {
-    writer.println(String.format(FORMAT_BULK_STRING, response.length(), response));
+    writer.print(String.format(FORMAT_BULK_STRING, response.length(), response));
+    writer.flush();
   }
 
-  public static String toBulkString(String input) {
-    if (input == null) {
-      return "$-1\r\n"; // Null bulk string
-    }
-    return "$" + input.length() + "\r\n" + input + "\r\n";
-  }
-
-
-  public static String toRESPArray(List<String> input) {
-    int len = input.size();
-    StringBuilder output = new StringBuilder(String.format("*%d\r\n", len));
-    for (String in : input) {
-      output.append(toBulkString(in));
-    }
-    return output.toString();
-  }
 }

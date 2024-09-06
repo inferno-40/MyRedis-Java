@@ -1,3 +1,7 @@
+package config;
+
+import rdb.RDBParser;
+
 public class RDBConfig {
   public static RDBConfig INSTANCE;
   private static String dir;
@@ -21,12 +25,15 @@ public class RDBConfig {
       isRDBEnabled = false;
     }
     INSTANCE = new RDBConfig(dir, dbFileName);
+    if (isRDBEnabled) {
+      RDBParser.parseRDB();
+    }
   }
 
   public static RDBConfig getInstance() {
     if (INSTANCE == null) {
       throw new IllegalStateException(
-              "RDBConfig has not been initialized. Call initializeInstance first.");
+              "config.RDBConfig has not been initialized. Call initializeInstance first.");
     }
     return INSTANCE;
   }
