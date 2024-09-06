@@ -47,7 +47,8 @@ public class RedisCache {
   }
 
 
-  public static List<String> getKeys() {
+  public static List<String> getAllKeys() {
+    System.out.println(new ArrayList<>(RedisCache.redisMap.keySet()).size());
     return new ArrayList<>(RedisCache.redisMap.keySet());
   }
 

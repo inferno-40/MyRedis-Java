@@ -127,6 +127,7 @@ public class ClientHandler implements Runnable {
         break;
       case "keys":
         response = handleKeys(command);
+        System.out.println(response);
         sendResponse(writer, response);
       default:
         break;
@@ -138,7 +139,7 @@ public class ClientHandler implements Runnable {
       String pattern = command[1];
       String bulkArrayResponse = "";
       if (pattern.equalsIgnoreCase("*")) {
-        bulkArrayResponse = RespConvertor.toRESPArray(RedisCache.getKeys());
+        bulkArrayResponse = RespConvertor.toRESPArray(RedisCache.getAllKeys());
       }
       return bulkArrayResponse;
     } catch (Exception e) {
