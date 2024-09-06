@@ -75,7 +75,11 @@ public class RDBParser {
         }
       }
       int keySize = parseSize(type);
+      if (keySize == 0) {
+        continue;
+      }
       String key = new String(inStream.readNBytes(keySize));
+      System.out.println(key);
       int valSize = parseSize(inStream.readUnsignedByte());
       String value = new String(inStream.readNBytes(valSize));
       if (!key.isEmpty()) {

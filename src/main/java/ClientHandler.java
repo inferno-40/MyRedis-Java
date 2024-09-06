@@ -127,7 +127,6 @@ public class ClientHandler implements Runnable {
         break;
       case "keys":
         response = handleKeys(command);
-        System.out.println(response);
         sendResponse(writer, response);
       default:
         break;
