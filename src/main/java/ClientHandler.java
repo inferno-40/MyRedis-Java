@@ -125,7 +125,9 @@ public class ClientHandler implements Runnable {
         response = handleConfig(command);
         sendBulkString(writer, response);
         break;
-
+      case "keys":
+        response = handleKeys(command);
+        sendBulkString(writer, response);
       default:
         break;
     }
