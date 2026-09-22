@@ -1,8 +1,6 @@
-[![progress-banner](https://backend.codecrafters.io/progress/redis/e1236dee-3a7d-4242-ab87-7904f32d5f17)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
-
 # MyRedis-Java
 
-A Redis server implemented from scratch in Java — no external Redis libraries, just raw sockets and the RESP wire protocol. Built as part of the CodeCrafters ["Build Your Own Redis"](https://codecrafters.io/challenges/redis) challenge.
+A Redis server implemented from scratch in Java — no external Redis libraries, just raw sockets and the RESP wire protocol.
 
 The server speaks the real Redis protocol, so it can be tested with `redis-cli` or any standard Redis client.
 
@@ -77,4 +75,4 @@ redis-cli KEYS "*"
 
 ## Notes
 
-This is a learning project built incrementally while working through the CodeCrafters challenge stages — it implements a useful subset of Redis rather than the full command set (no pub/sub, transactions, replication, or additional data types like lists/hashes/sets yet).
+This is a learning project built incrementally — it implements a useful subset of Redis rather than the full command set (no pub/sub, transactions, replication, or additional data types like lists/hashes/sets yet).
